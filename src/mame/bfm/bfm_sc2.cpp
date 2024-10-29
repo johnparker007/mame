@@ -771,7 +771,7 @@ void bfm_sc2_state::unknown_w(uint8_t data)
 
 void bfm_sc2_state::update_volume()
 {
-	float percent = m_volume_override ? 1.0f : (64 - m_global_volume) / 64.0f;
+	float percent = m_volume_override ? 1.0f : (31 - m_global_volume) / 31.0f;
 
 	if (m_ym2413)
 	{
