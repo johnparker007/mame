@@ -565,6 +565,32 @@ void sc4_state::sc4_mem_w(offs_t offset, uint16_t data, uint16_t mem_mask)
 							m_ymz->write(1, data & 0xff);
 							break;
 
+						case 0x1300: // Volume (VCN Digital Volume Pot)
+							if ((data ^ m_vcn_digital_pot) & 1)
+							{
+								if (data & 1)
+								{
+									if (data & 2)
+									{
+										if (m_global_volume > 0)
+										{
+											--m_global_volume;
+										}
+									}
+									else
+									{
+										if (m_global_volume < 100)
+										{
+											++m_global_volume;
+										}
+									}
+
+									update_volume();
+								}
+								m_vcn_digital_pot = data & 0xff;
+							}
+							break;
+
 						case 0x1330:
 							bfm_sc4_reel4_w(data&0xf);
 							//m_meterstatus = (m_meterstatus&0x3f) | ((data & 0x30) << 2);
@@ -900,9 +926,17 @@ void sc4_state::bfmdm01_busy(int state)
 	// Must tie back to inputs somehow!
 }
 
+void sc4_state::update_volume()
+{
+	float percent = m_global_volume / 100.0f;
+
+	m_ymz->set_output_gain(ALL_OUTPUTS, percent);
+}
+
 void sc4_state::sc4_common(machine_config &config)
 {
-	M68307(config, m_maincpu, 16000000);    // 68307! (EC000 core)
+	// from MC68307 datasheet: 8.33 Mhz @ 3.3V, 16.67 Mhz @ 5V
+	M68307(config, m_maincpu, 16670000);    // 68307! (EC000 core)
 	m_maincpu->set_addrmap(AS_PROGRAM, &sc4_state::sc4_map);
 	m_maincpu->serial_a_tx_callback().set(FUNC(sc4_state::m68307_duart_txa));
 	m_maincpu->serial_inport_callback().set(FUNC(sc4_state::m68307_duart_input_r));
@@ -913,8 +947,10 @@ void sc4_state::sc4_common(machine_config &config)
 
 	NVRAM(config, "nvram", nvram_device::DEFAULT_ALL_1);
 
-	MC68681(config, m_duart, 16000000/4); // ?? Mhz
-	m_duart->set_clocks(XTAL(16'000'000)/2/8, XTAL(16'000'000)/2/16, XTAL(16'000'000)/2/16, XTAL(16'000'000)/2/8);
+	MC68681(config, m_duart, 16670000 / 4);
+
+	m_duart->set_clocks(16670000 / 2 / 8, 16670000 / 2 / 16, 16670000 / 2 / 16, 16670000 / 2 / 8);
+
 	m_duart->irq_cb().set(FUNC(sc4_state::bfm_sc4_duart_irq_handler));
 	m_duart->a_tx_cb().set(FUNC(sc4_state::bfm_sc4_duart_txa));
 	m_duart->inport_cb().set(FUNC(sc4_state::bfm_sc4_duart_input_r));
@@ -924,7 +960,8 @@ void sc4_state::sc4_common(machine_config &config)
 
 //  config.set_default_layout(layout_bfm_sc4);
 
-	YMZ280B(config, m_ymz, 16000000); // ?? Mhz
+	YMZ280B(config, m_ymz, 16670000);
+
 	m_ymz->add_route(ALL_OUTPUTS, "mono", 1.0);
 
 	SEC(config, m_sec);

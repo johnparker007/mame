@@ -173,10 +173,15 @@ public:
 
 	uint16_t m_mainram[0x10000/2]{};
 
+	uint8_t m_global_volume;
+	uint8_t m_vcn_digital_pot;
+
 	uint8_t read_input_matrix(int row);
 
 
 	void bfmdm01_busy(int state);
+
+	void update_volume();
 
 	uint16_t sc4_mem_r(offs_t offset, uint16_t mem_mask = ~0);
 	void sc4_mem_w(offs_t offset, uint16_t data, uint16_t mem_mask = ~0);
