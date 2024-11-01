@@ -714,7 +714,7 @@ uint8_t maygay1b_state::mcu_port2_r()
 
 void maygay1b_state::maygay_m1(machine_config &config)
 {
-	MC6809(config, m_maincpu, M1_MASTER_CLOCK/2); // claimed to be 4 MHz
+	MC6809(config, m_maincpu, M1_MASTER_CLOCK);
 	m_maincpu->set_addrmap(AS_PROGRAM, &maygay1b_state::m1_memmap);
 
 	I80C51(config, m_mcu, 2000000); //  EP840034.A-P-80C51AVW
@@ -745,17 +745,17 @@ void maygay1b_state::maygay_m1(machine_config &config)
 	S16LF01(config, m_vfd);
 	SPEAKER(config, "lspeaker").front_left();
 	SPEAKER(config, "rspeaker").front_right();
-	YM2149(config, m_ay, M1_MASTER_CLOCK);
+	YM2149(config, m_ay, M1_DUART_CLOCK);
 	m_ay->port_a_write_callback().set(FUNC(maygay1b_state::m1_meter_w));
 	m_ay->port_b_write_callback().set(FUNC(maygay1b_state::m1_lockout_w));
 	m_ay->add_route(ALL_OUTPUTS, "lspeaker", 1.0);
 	m_ay->add_route(ALL_OUTPUTS, "rspeaker", 1.0);
 
-	ym2413_device &ymsnd(YM2413(config, "ymsnd", M1_MASTER_CLOCK/4));
+	ym2413_device &ymsnd(YM2413(config, "ymsnd", M1_DUART_CLOCK));
 	ymsnd.add_route(ALL_OUTPUTS, "lspeaker", 1.0);
 	ymsnd.add_route(ALL_OUTPUTS, "rspeaker", 1.0);
 
-	OKIM6376(config, m_msm6376, 102400); //? Seems to work well with samples, but unconfirmed
+	OKIM6376(config, m_msm6376, 128000);
 	m_msm6376->add_route(ALL_OUTPUTS, "lspeaker", 1.0);
 	m_msm6376->add_route(ALL_OUTPUTS, "rspeaker", 1.0);
 
