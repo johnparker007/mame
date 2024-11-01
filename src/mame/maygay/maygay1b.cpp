@@ -157,6 +157,15 @@ void maygay1b_state::cpu0_nmi()
 	{
 		m_maincpu->set_input_line(INPUT_LINE_NMI, CLEAR_LINE);
 	}
+
+	if (m_upd7759)
+	{
+		int busy = !m_upd7759->busy_r();
+		if (!busy)
+		{
+			cpu0_firq(1);
+		}
+	}
 }
 
 /***************************************************************************
@@ -481,7 +490,7 @@ void maygay1b_state::m1_memmap(address_map &map)
  *************************************************/
 uint8_t maygay1b_state::m1_firq_nec_r()
 {
-	int busy = m_upd7759->busy_r();
+	int busy = !m_upd7759->busy_r();
 	if (!busy)
 	{
 		cpu0_firq(1);
