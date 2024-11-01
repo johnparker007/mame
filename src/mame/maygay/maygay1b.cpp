@@ -755,7 +755,7 @@ void maygay1b_state::maygay_m1(machine_config &config)
 	ymsnd.add_route(ALL_OUTPUTS, "lspeaker", 1.0);
 	ymsnd.add_route(ALL_OUTPUTS, "rspeaker", 1.0);
 
-	OKIM6376(config, m_msm6376, 128000);
+	OKIM6376(config, m_msm6376, 102400);
 	m_msm6376->add_route(ALL_OUTPUTS, "lspeaker", 1.0);
 	m_msm6376->add_route(ALL_OUTPUTS, "rspeaker", 1.0);
 
